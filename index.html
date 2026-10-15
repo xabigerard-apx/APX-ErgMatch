@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>APX Conversion Chart</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icon.png" type="image/png">
+  <meta name="theme-color" content="#613795">
   <style>
     @font-face {
       font-family: 'Squartiqa Inline';
@@ -21,9 +24,9 @@
       --text: #f4f4f5;
       --text-muted: #71717a;
 
-      /* OPTION 5 MATTE */
-      --male-val: #ffffff;      /* Pure Crisp White */
-      --female-val: #a855f7;    /* APX Neon Purple */
+      /* Couleurs de valeurs H/F */
+      --male-val: #ffffff;
+      --female-val: #a855f7;
     }
 
     * {
@@ -50,7 +53,6 @@
       gap: 14px;
     }
 
-    /* HEADER APX */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -104,7 +106,6 @@
       border-color: #ef4444; 
     }
 
-    /* SWITCH PRINCIPAL (DISTANCE VS CALORIES) */
     .mode-switch {
       display: flex;
       background: var(--card-inner);
@@ -136,7 +137,6 @@
       box-shadow: 0 0 12px var(--apx-purple-glow);
     }
 
-    /* SECTION TEMPS / DROPDOWN */
     .section-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -178,7 +178,6 @@
       box-shadow: 0 0 12px var(--apx-purple-glow);
     }
 
-    /* LIGNE UNIFIÉE : LABEL + CASE ENTRÉE/SORTIE */
     .item-row {
       display: flex;
       flex-direction: column;
@@ -228,13 +227,11 @@
       margin: 0;
     }
 
-    /* Placeholder neutre en gris discret */
     .box-input::placeholder {
       color: var(--text-muted);
       opacity: 0.5;
     }
 
-    /* VALEURS MATTES */
     .in-male { color: var(--male-val); }
     .in-female { color: var(--female-val); }
     .in-neutral { color: #ffffff; }
@@ -275,7 +272,7 @@
   <div class="section-card">
     <div class="section-title">Target Time Domain</div>
     <select class="select-time" id="sel_time" onchange="onSelectTime(this.value)">
-      <!-- Options injected dynamically -->
+      <!-- Injected dynamically -->
     </select>
   </div>
 
@@ -341,9 +338,7 @@
     document.getElementById('btnModeCal').classList.toggle('active', mode === 'calorie');
     buildTimeDropdown();
     buildLayout();
-    if (currentRunMeters > 0) {
-      render();
-    }
+    if (currentRunMeters > 0) render();
   }
 
   function buildTimeDropdown() {
@@ -557,6 +552,11 @@
     currentRunMeters = 0;
     document.getElementById('sel_time').value = '';
     document.querySelectorAll('.box-input').forEach(input => input.value = '');
+  }
+
+  // Register PWA service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 
   window.onload = initApp;
