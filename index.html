@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>APX Conversion Chart</title>
+  <style>
+    @font-face {
+      font-family: 'Squartiqa Inline';
+      src: local('Squartiqa Inline'), local('Squartiqa4F-Inline'), local('Squartiqa');
+      font-display: swap;
+    }
+
+    :root {
+      --bg: #000000;
+      --card-bg: #09090b;
+      --card-inner: #121217;
+      --border: #22222a;
+      --apx-purple: #613795;
+      --apx-purple-glow: rgba(97, 55, 149, 0.45);
+      --text: #f4f4f5;
+      --text-muted: #71717a;
+
+      /* OPTION 5 MATTE */
+      --male-val: #ffffff;      /* Pure Crisp White */
+      --female-val: #a855f7;    /* APX Neon Purple */
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 12px;
+      min-height: 100vh;
+    }
+
+    .phone-container {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* HEADER APX */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 4px 4px 4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .apx-logo {
+      font-family: 'Squartiqa Inline', 'Arial Black', sans-serif;
+      font-size: 2.1rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      color: #fff;
+      text-shadow: 
+        0 0 10px var(--apx-purple-glow),
+        0 0 20px var(--apx-purple);
+      line-height: 1;
+    }
+
+    .app-subtitle {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--apx-purple);
+    }
+
+    .btn-clear {
+      background: transparent;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #f87171;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-clear:hover { 
+      background: #ef4444; 
+      color: #fff; 
+      border-color: #ef4444; 
+    }
+
+    /* SWITCH PRINCIPAL (DISTANCE VS CALORIES) */
+    .mode-switch {
+      display: flex;
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 10px 6px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      border-radius: 6px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      transition: all 0.2s ease;
+    }
+
+    .mode-btn.active {
+      background: var(--apx-purple);
+      color: #ffffff;
+      border-color: #7b45bd;
+      box-shadow: 0 0 12px var(--apx-purple-glow);
+    }
+
+    /* SECTION TEMPS / DROPDOWN */
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      text-align: center;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    .select-time {
+      width: 100%;
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      color: #fff;
+      font-size: 1.15rem;
+      font-weight: 800;
+      padding: 10px 14px;
+      border-radius: 8px;
+      outline: none;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .select-time:focus {
+      border-color: var(--apx-purple);
+      box-shadow: 0 0 12px var(--apx-purple-glow);
+    }
+
+    /* LIGNE UNIFIÉE : LABEL + CASE ENTRÉE/SORTIE */
+    .item-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .item-label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .single-box {
+      width: 100%;
+      max-width: 290px;
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .single-box:focus-within {
+      border-color: var(--apx-purple);
+      box-shadow: 0 0 12px var(--apx-purple-glow);
+    }
+
+    .box-input {
+      background: transparent;
+      border: none;
+      font-size: 1.3rem;
+      font-weight: 800;
+      text-align: center;
+      outline: none;
+      -moz-appearance: textfield;
+      width: 100%;
+    }
+    .box-input::-webkit-outer-spin-button,
+    .box-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* Placeholder neutre en gris discret */
+    .box-input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    /* VALEURS MATTES */
+    .in-male { color: var(--male-val); }
+    .in-female { color: var(--female-val); }
+    .in-neutral { color: #ffffff; }
+
+    .slash {
+      color: #3f3f46;
+      font-size: 1.2rem;
+      font-weight: 400;
+      user-select: none;
+    }
+
+    .unit-tag {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 800;
+      user-select: none;
+      text-transform: lowercase;
+    }
+  </style>
+</head>
+<body>
+
+<div class="phone-container">
+
+  <div class="top-bar">
+    <div class="brand-wrap">
+      <div class="apx-logo">APX</div>
+      <div class="app-subtitle">Cardio Scale</div>
+    </div>
+    <button class="btn-clear" onclick="resetAll()">Clear</button>
+  </div>
+
+  <div class="mode-switch">
+    <button class="mode-btn active" id="btnModeDist" onclick="setConversionMode('distance')">Distance</button>
+    <button class="mode-btn" id="btnModeCal" onclick="setConversionMode('calorie')">Calories</button>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Target Time Domain</div>
+    <select class="select-time" id="sel_time" onchange="onSelectTime(this.value)">
+      <!-- Options injected dynamically -->
+    </select>
+  </div>
+
+  <div id="dynamicContent"></div>
+
+</div>
+
+<script>
+  let conversionMode = 'distance';
+
+  const TABLE_DIST = [
+    { label: ":15 - :30", run: 100, rowH: 125, rowF: 115, bikeH: 250, bikeF: 200, skiH: 125, skiF: 100, airH: 8, airF: 6, shut: 5 },
+    { label: ":30 - 1:00", run: 200, rowH: 250, rowF: 225, bikeH: 500, bikeF: 400, skiH: 250, skiF: 200, airH: 15, airF: 12, shut: 10 },
+    { label: "1:30 - 2:00", run: 400, rowH: 500, rowF: 450, bikeH: 1000, bikeF: 800, skiH: 500, skiF: 400, airH: 30, airF: 24, shut: 20 },
+    { label: "2:30 - 3:00", run: 600, rowH: 750, rowF: 675, bikeH: 1500, bikeF: 1200, skiH: 750, skiF: 600, airH: 45, airF: 36, shut: 30 },
+    { label: "4:00 - 5:00", run: 800, rowH: 1000, rowF: 900, bikeH: 2000, bikeF: 1600, skiH: 1000, skiF: 800, airH: 60, airF: 48, shut: 40 },
+    { label: "5:00 - 6:00", run: 1000, rowH: 1250, rowF: 1125, bikeH: 2500, bikeF: 2000, skiH: 1250, skiF: 1000, airH: 75, airF: 60, shut: 50 },
+    { label: "8:00 - 10:00", run: 1600, rowH: 2000, rowF: 1800, bikeH: 4000, bikeF: 3200, skiH: 2000, skiF: 1600, airH: 120, airF: 96, shut: 80 },
+    { label: "10:00 - 12:30", run: 2000, rowH: 2500, rowF: 2250, bikeH: 5000, bikeF: 4000, skiH: 2500, skiF: 2000, airH: 150, airF: 120, shut: 100 },
+    { label: "25:00 - 32:00", run: 5000, rowH: 6250, rowF: 5600, bikeH: 12500, bikeF: 10000, skiH: 6250, skiF: 5000, airH: 375, airF: 300, shut: 250 },
+    { label: "52:00 - 68:00", run: 10000, rowH: 12500, rowF: 11250, bikeH: 25000, bikeF: 20000, skiH: 12500, skiF: 10000, airH: 750, airF: 600, shut: 500 }
+  ];
+
+  const TABLE_CAL = [
+    { label: ":15 - :30", c2H: 10, c2F: 8, airH: 8, airF: 6, run: 100, shut: 5 },
+    { label: ":18 - :36", c2H: 12, c2F: 10, airH: 9, airF: 7, run: 120, shut: 6 },
+    { label: ":20 - :40", c2H: 13, c2F: 11, airH: 10, airF: 8, run: 135, shut: 7 },
+    { label: ":22 - :45", c2H: 15, c2F: 12, airH: 11, airF: 9, run: 150, shut: 8 },
+    { label: ":24 - :48", c2H: 16, c2F: 13, airH: 12, airF: 10, run: 160, shut: 9 },
+    { label: ":30 - 1:00", c2H: 20, c2F: 16, airH: 15, airF: 12, run: 200, shut: 10 },
+    { label: ":32 - 1:05", c2H: 21, c2F: 17, airH: 16, airF: 13, run: 215, shut: 11 },
+    { label: ":36 - 1:12", c2H: 24, c2F: 19, airH: 18, airF: 14, run: 240, shut: 12 },
+    { label: ":38 - 1:15", c2H: 25, c2F: 20, airH: 19, airF: 15, run: 250, shut: 13 },
+    { label: ":42 - 1:22", c2H: 28, c2F: 22, airH: 21, airF: 17, run: 275, shut: 14 },
+    { label: ":45 - 1:30", c2H: 30, c2F: 24, airH: 23, airF: 18, run: 300, shut: 15 },
+    { label: ":50 - 1:40", c2H: 33, c2F: 26, airH: 25, airF: 20, run: 330, shut: 16 },
+    { label: ":55 - 1:45", c2H: 35, c2F: 28, airH: 26, airF: 21, run: 350, shut: 17 },
+    { label: "1:30 - 2:00", c2H: 40, c2F: 32, airH: 30, airF: 24, run: 400, shut: 20 },
+    { label: "1:45 - 2:15", c2H: 45, c2F: 36, airH: 34, airF: 27, run: 450, shut: 23 },
+    { label: "2:00 - 2:30", c2H: 50, c2F: 40, airH: 38, airF: 30, run: 500, shut: 25 },
+    { label: "2:15 - 2:45", c2H: 55, c2F: 44, airH: 41, airF: 33, run: 550, shut: 27 },
+    { label: "2:30 - 3:00", c2H: 60, c2F: 48, airH: 45, airF: 36, run: 600, shut: 30 },
+    { label: "2:45 - 3:15", c2H: 65, c2F: 52, airH: 49, airF: 39, run: 650, shut: 33 },
+    { label: "3:00 - 4:00", c2H: 70, c2F: 56, airH: 53, airF: 42, run: 700, shut: 35 },
+    { label: "3:30 - 4:30", c2H: 75, c2F: 60, airH: 56, airF: 45, run: 750, shut: 37 },
+    { label: "4:00 - 5:00", c2H: 80, c2F: 64, airH: 60, airF: 48, run: 800, shut: 40 },
+    { label: "4:15 - 5:15", c2H: 85, c2F: 68, airH: 64, airF: 51, run: 850, shut: 43 },
+    { label: "4:30 - 5:30", c2H: 90, c2F: 72, airH: 68, airF: 54, run: 900, shut: 45 },
+    { label: "4:45 - 5:45", c2H: 95, c2F: 76, airH: 71, airF: 57, run: 950, shut: 47 },
+    { label: "5:00 - 6:00", c2H: 100, c2F: 80, airH: 75, airF: 60, run: 1000, shut: 50 }
+  ];
+
+  let currentRunMeters = 0;
+
+  function initApp() {
+    buildTimeDropdown();
+    buildLayout();
+  }
+
+  function setConversionMode(mode) {
+    conversionMode = mode;
+    document.getElementById('btnModeDist').classList.toggle('active', mode === 'distance');
+    document.getElementById('btnModeCal').classList.toggle('active', mode === 'calorie');
+    buildTimeDropdown();
+    buildLayout();
+    if (currentRunMeters > 0) {
+      render();
+    }
+  }
+
+  function buildTimeDropdown() {
+    const sel = document.getElementById('sel_time');
+    sel.innerHTML = '<option value="">-- Select Time Domain --</option>';
+    const list = (conversionMode === 'distance') ? TABLE_DIST : TABLE_CAL;
+    list.forEach((item) => {
+      const opt = document.createElement('option');
+      opt.value = item.run;
+      opt.innerText = item.label;
+      if (currentRunMeters > 0 && item.run === currentRunMeters) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+
+  function onSelectTime(val) {
+    if (!val) {
+      resetAll();
+      return;
+    }
+    currentRunMeters = parseFloat(val);
+    render();
+  }
+
+  function buildLayout() {
+    const container = document.getElementById('dynamicContent');
+    if (conversionMode === 'distance') {
+      container.innerHTML = `
+        <div class="section-card">
+          <div class="section-title">Distance & Equivalence</div>
+
+          <div class="item-row">
+            <div class="item-label">Run</div>
+            <div class="single-box">
+              <input type="number" class="box-input in-neutral" id="f_run" placeholder="-" oninput="onInputRun(this.value)">
+              <span class="unit-tag">m</span>
+            </div>
+          </div>
+
+          <div class="item-row">
+            <div class="item-label">Row</div>
+            <div class="single-box">
+              <input type="number" class="box-input in-male" id="f_row_m" placeholder="-" oninput="onInputRowM(this.value)">
+              <span class="slash">/</span>
+              <input type="number" class="box-input in-female" id="f_row_f" placeholder="-" oninput="onInputRowF(this.value)">
+              <span class="unit-tag">m</span>
+            </div>
+          </div>
+
+          <div class="item-row">
+            <div class="item-label">BikeErg</div>
+            <div class="single-box">
+              <input type="number" class="box-input in-male" id="f_bike_m" placeholder="-" oninput="onInputBikeM(this.value)">
+              <span class="slash">/</span>
+              <input type="number" class="box-input in-female" id="f_bike_f" placeholder="-" oninput="onInputBikeF(this.value)">
+              <span class="unit-tag">m</span>
+            </div>
+          </div>
+
+          <div class="item-row">
+            <div class="item-label">SkiErg</div>
+            <div class="single-box">
+              <input type="number" class="box-input in-male" id="f_ski_m" placeholder="-" oninput="onInputSkiM(this.value)">
+              <span class="slash">/</span>
+              <input type="number" class="box-input in-female" id="f_ski_f" placeholder="-" oninput="onInputSkiF(this.value)">
+              <span class="unit-tag">m</span>
+            </div>
+          </div>
+
+          <div class="item-row">
+            <div class="item-label">Air Bike (Calories)</div>
+            <div class="single-box">
+              <input type="number" class="box-input in-male" id="f_air_m" placeholder="-" oninput="onInputAirDistM(this.value)">
+              <span class="slash">/</span>
+              <input type="number" class="box-input in-female" id="f_air_f" placeholder="-" oninput="onInputAirDistF(this.value)">
+              <span class="unit-tag">cal</span>
+            </div>
+          </div>
+
+          <div class="item-row">
+            <div class="item-label">Shuttle Run (25ft + 25ft)</div>
+            <div class="single-box">
+              <input type="number" class="box-input in-neutral" id="f_shut" placeholder="-" oninput="onInputShut(this.value)">
+              <span class="unit-tag">reps</span>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="section-card">
+          <div class="section-title">Calories & Equivalence</div>
+
+          <div class="item-row">
+            <div class="item-label">Row / Bike / Ski (Concept2)</div>
+            <div class="single-box">
+              <input type="number" class="box-input in-male" id="f_c2_m" placeholder="-" oninput="onInputC2M(this.value)">
+              <span class="slash">/</span>
+              <input type="number" class="box-input in-female" id="f_c2_f" placeholder="-" oninput="onInputC2F(this.value)">
+              <span class="unit-tag">cal</span>
+            </div>
+          </div>
+
+          <div class="item-row">
+            <div class="item-label">Air Bike / Air Runner</div>
+            <div class="single-box">
+              <input type="number" class="box-input in-male" id="f_aircal_m" placeholder="-" oninput="onInputAirCalM(this.value)">
+              <span class="slash">/</span>
+              <input type="number" class="box-input in-female" id="f_aircal_f" placeholder="-" oninput="onInputAirCalF(this.value)">
+              <span class="unit-tag">cal</span>
+            </div>
+          </div>
+
+          <div class="item-row">
+            <div class="item-label">Run (Meters)</div>
+            <div class="single-box">
+              <input type="number" class="box-input in-neutral" id="f_run_cal" placeholder="-" oninput="onInputRun(this.value)">
+              <span class="unit-tag">m</span>
+            </div>
+          </div>
+
+          <div class="item-row">
+            <div class="item-label">Shuttle Run (25ft + 25ft)</div>
+            <div class="single-box">
+              <input type="number" class="box-input in-neutral" id="f_shut_cal" placeholder="-" oninput="onInputShut(this.value)">
+              <span class="unit-tag">reps</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  function render(skipInputId = null) {
+    if (!currentRunMeters || currentRunMeters <= 0) return;
+
+    if (conversionMode === 'distance') {
+      const rowH = Math.round(currentRunMeters * 1.25);
+      const rowF = Math.round(currentRunMeters * 1.125);
+      const bikeH = Math.round(currentRunMeters * 2.5);
+      const bikeF = Math.round(currentRunMeters * 2.0);
+      const skiH = Math.round(currentRunMeters * 1.25);
+      const skiF = Math.round(currentRunMeters * 1.0);
+      const airH = Math.round(currentRunMeters * 0.075);
+      const airF = Math.round(airH * 0.80);
+      const shut = Math.round(currentRunMeters * 0.05);
+
+      updateField('f_run', Math.round(currentRunMeters), skipInputId);
+      updateField('f_row_m', rowH, skipInputId);
+      updateField('f_row_f', rowF, skipInputId);
+      updateField('f_bike_m', bikeH, skipInputId);
+      updateField('f_bike_f', bikeF, skipInputId);
+      updateField('f_ski_m', skiH, skipInputId);
+      updateField('f_ski_f', skiF, skipInputId);
+      updateField('f_air_m', airH, skipInputId);
+      updateField('f_air_f', airF, skipInputId);
+      updateField('f_shut', shut, skipInputId);
+    } else {
+      const c2H = Math.round(currentRunMeters * 0.10);
+      const c2F = Math.round(c2H * 0.80);
+      const airH = Math.round(c2H * 0.75);
+      const airF = Math.round(airH * 0.80);
+      const shut = Math.round(currentRunMeters * 0.05);
+
+      updateField('f_c2_m', c2H, skipInputId);
+      updateField('f_c2_f', c2F, skipInputId);
+      updateField('f_aircal_m', airH, skipInputId);
+      updateField('f_aircal_f', airF, skipInputId);
+      updateField('f_run_cal', Math.round(currentRunMeters), skipInputId);
+      updateField('f_shut_cal', shut, skipInputId);
+    }
+  }
+
+  function updateField(id, val, skipId) {
+    if (id === skipId) return;
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  }
+
+  function onInputRun(v) { currentRunMeters = parseFloat(v) || 0; syncDropdown(); render('f_run'); }
+  function onInputRowM(v) { currentRunMeters = (parseFloat(v) || 0) / 1.25; syncDropdown(); render('f_row_m'); }
+  function onInputRowF(v) { currentRunMeters = (parseFloat(v) || 0) / 1.125; syncDropdown(); render('f_row_f'); }
+  function onInputBikeM(v) { currentRunMeters = (parseFloat(v) || 0) / 2.5; syncDropdown(); render('f_bike_m'); }
+  function onInputBikeF(v) { currentRunMeters = (parseFloat(v) || 0) / 2.0; syncDropdown(); render('f_bike_f'); }
+  function onInputSkiM(v) { currentRunMeters = (parseFloat(v) || 0) / 1.25; syncDropdown(); render('f_ski_m'); }
+  function onInputSkiF(v) { currentRunMeters = (parseFloat(v) || 0) / 1.0; syncDropdown(); render('f_ski_f'); }
+  function onInputAirDistM(v) { currentRunMeters = (parseFloat(v) || 0) / 0.075; syncDropdown(); render('f_air_m'); }
+  function onInputAirDistF(v) { currentRunMeters = ((parseFloat(v) || 0) / 0.80) / 0.075; syncDropdown(); render('f_air_f'); }
+  function onInputShut(v) { currentRunMeters = (parseFloat(v) || 0) / 0.05; syncDropdown(); render('f_shut'); }
+
+  function onInputC2M(v) { currentRunMeters = (parseFloat(v) || 0) / 0.10; syncDropdown(); render('f_c2_m'); }
+  function onInputC2F(v) { currentRunMeters = ((parseFloat(v) || 0) / 0.80) / 0.10; syncDropdown(); render('f_c2_f'); }
+  function onInputAirCalM(v) { currentRunMeters = ((parseFloat(v) || 0) / 0.75) / 0.10; syncDropdown(); render('f_aircal_m'); }
+  function onInputAirCalF(v) { currentRunMeters = (((parseFloat(v) || 0) / 0.80) / 0.75) / 0.10; syncDropdown(); render('f_aircal_f'); }
+
+  function syncDropdown() {
+    const list = (conversionMode === 'distance') ? TABLE_DIST : TABLE_CAL;
+    let closestVal = list[0].run;
+    let minDiff = Infinity;
+    for (const item of list) {
+      const diff = Math.abs(item.run - currentRunMeters);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestVal = item.run;
+      }
+    }
+    document.getElementById('sel_time').value = closestVal;
+  }
+
+  function resetAll() {
+    currentRunMeters = 0;
+    document.getElementById('sel_time').value = '';
+    document.querySelectorAll('.box-input').forEach(input => input.value = '');
+  }
+
+  window.onload = initApp;
+</script>
+</body>
+</html>
