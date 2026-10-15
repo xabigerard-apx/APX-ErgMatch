@@ -1,16 +1,16 @@
 {
   "name": "APX CardioScale",
   "short_name": "APX Scale",
-  "description": "Convertisseur officiel de machines cardio APX",
+  "description": "APX Official Cardio Conversion Tool",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#613795",
   "icons": [
     {
-      "src": "./icon.svg",
+      "src": "./icon.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
