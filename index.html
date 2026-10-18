@@ -103,7 +103,7 @@
       border-color: #ef4444; 
     }
 
-    /* SWITCH PRINCIPAL (3 ONGLETS) */
+    /* SWITCH PRINCIPAL (4 ONGLETS) */
     .mode-switch {
       display: flex;
       background: var(--card-inner);
@@ -316,7 +316,7 @@
       text-transform: lowercase;
     }
 
-    /* BADGES DISTANCE PREDEFINIES */
+    /* BADGES ET NIVEAUX */
     .presets-row {
       display: flex;
       justify-content: center;
@@ -325,6 +325,7 @@
       margin-top: -2px;
       margin-bottom: 4px;
     }
+
     .level-block {
       display: flex;
       flex-direction: column;
@@ -337,6 +338,7 @@
       border-bottom: none;
       padding-bottom: 0;
     }
+
     .preset-pill {
       background: var(--card-inner);
       border: 1px solid var(--border);
@@ -367,7 +369,7 @@
     <button class="btn-clear" onclick="resetAll()">Clear</button>
   </div>
 
-<div class="mode-switch">
+  <div class="mode-switch">
     <button class="mode-btn active" id="btnModeDist" onclick="setMode('distance')">Distance</button>
     <button class="mode-btn" id="btnModeCal" onclick="setMode('calorie')">Calories</button>
     <button class="mode-btn" id="btnModeErg" onclick="setMode('erg')">Erg Calc</button>
@@ -433,7 +435,7 @@
     { label: "5:00 - 6:00", c2H: 100, c2F: 80, airH: 75, airF: 60, run: 1000, shut: 50 }
   ];
 
-function setMode(mode) {
+  function setMode(mode) {
     mainMode = mode;
     document.getElementById('btnModeDist').classList.toggle('active', mode === 'distance');
     document.getElementById('btnModeCal').classList.toggle('active', mode === 'calorie');
@@ -523,7 +525,7 @@ function setMode(mode) {
             </div>
           </div>
         `;
-      } else if (mainMode === 'erg') {
+      } else {
         fieldsHtml = `
           <div class="section-card">
             <div class="section-title">Calories & Equivalence</div>
@@ -575,8 +577,7 @@ function setMode(mode) {
 
       if (currentRunMeters > 0) renderScale();
 
-    } else {
-      // 3E ONGLET : ERG CALC
+    } else if (mainMode === 'erg') {
       const isC2 = ergSubMode === 'c2';
       const isEcho = ergSubMode === 'echo';
       const isRun = ergSubMode === 'run';
@@ -673,7 +674,6 @@ function setMode(mode) {
           </div>
         `;
       } else {
-        // RUNNING PACE CALCULATOR
         const isKm = runUnit === 'km';
 
         let displayDist = '';
@@ -759,7 +759,7 @@ function setMode(mode) {
       if (isRun) {
         updateRunDisplay();
       }
-    }
+
     } else if (mainMode === 'weights') {
       container.innerHTML = `
         <div class="section-card">
@@ -857,7 +857,7 @@ function setMode(mode) {
   function updateField(id, val, skipId) {
     if (id === skipId) return;
     const el = document.getElementById(id);
-    if (el) el.value = val;
+    if (el) el.value = val > 0 ? val : '';
   }
 
   function onInputRun(v) { currentRunMeters = parseFloat(v) || 0; syncDropdown(); renderScale('f_run'); }
@@ -1030,7 +1030,7 @@ function setMode(mode) {
     }
   }
 
-// --- ERG CALC : ECHO BIKE (CALIBRATION RÉELLE ROGUE) ---
+  // --- ERG CALC : ECHO BIKE (CALIBRATION RÉELLE ROGUE) ---
   function wattsFromRpm(rpm) {
     if (rpm <= 0) return 0;
     if (rpm < 30) return Math.round(rpm * 1.5);
@@ -1050,7 +1050,7 @@ function setMode(mode) {
     return Math.round(calHr / 3);
   }
 
- function calcEcho(trigger) {
+  function calcEcho(trigger) {
     const timeEl = document.getElementById('echo_time');
     const calEl = document.getElementById('echo_cal');
     const rpmEl = document.getElementById('echo_rpm');
@@ -1147,6 +1147,7 @@ function setMode(mode) {
       }
     }
   }
+
   // --- ERG CALC : RUNNING (CONVERSION AUTOMATIQUE KM / MI) ---
   const METERS_PER_MILE = 1609.344;
 
@@ -1233,7 +1234,8 @@ function setMode(mode) {
       }
     }
   }
-// --- WEIGHTS TAB LOGIC ---
+
+  // --- WEIGHTS TAB LOGIC ---
   const PRESET_BARBELL_STANDARDS = [
     { label: "45/35",   rxM: 45,  rxF: 35,  perfM: 45,  perfF: 35,  fitM: 35,  fitF: 25 },
     { label: "75/55",   rxM: 75,  rxF: 55,  perfM: 65,  perfF: 45,  fitM: 55,  fitF: 35 },
@@ -1369,8 +1371,7 @@ function setMode(mode) {
     renderWeightOutputs(sourceId);
   }
 
-  
-function resetAll() {
+  function resetAll() {
     currentRunMeters = 0;
     currentRxMlbs = 0;
     runState = { distMeters: 5000, timeSec: 0, speedKmh: 0 };
