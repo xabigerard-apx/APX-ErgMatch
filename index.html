@@ -974,7 +974,7 @@
     return Math.round(calHr / 3);
   }
 
-  function calcEcho(trigger) {
+ function calcEcho(trigger) {
     const timeEl = document.getElementById('echo_time');
     const calEl = document.getElementById('echo_cal');
     const rpmEl = document.getElementById('echo_rpm');
@@ -987,69 +987,90 @@
     let calHr = parseFloat(calHrEl.value) || 0;
     let watts = parseFloat(wattsEl.value) || 0;
 
-    // 1. Time + Calories saisis
-    if (tSec > 0 && cal > 0 && (trigger === 'time' || trigger === 'cal')) {
-      calHr = Math.round((cal / tSec) * 3600);
-      watts = wattsFromCalHr(calHr);
-      rpm = rpmFromWatts(watts);
-
-      rpmEl.value = rpm > 0 ? rpm : '';
-      calHrEl.value = calHr;
-      wattsEl.value = watts;
+    // 1. Déclencheur Temps
+    if (trigger === 'time') {
+      if (tSec > 0 && cal > 0) {
+        calHr = Math.round((cal / tSec) * 3600);
+        watts = wattsFromCalHr(calHr);
+        rpm = rpmFromWatts(watts);
+        rpmEl.value = rpm > 0 ? rpm : '';
+        calHrEl.value = calHr;
+        wattsEl.value = watts;
+      } else if (tSec > 0 && calHr > 0) {
+        calEl.value = Math.round((calHr * tSec) / 3600);
+      }
       return;
     }
 
-    // 2. RPM saisi directement
-    if (rpm > 0 && trigger === 'rpm') {
-      watts = wattsFromRpm(rpm);
-      calHr = calHrFromWatts(watts);
-
-      wattsEl.value = watts;
-      calHrEl.value = calHr;
-
-      if (tSec > 0) {
-        calEl.value = Math.round((calHr * tSec) / 3600);
-      } else if (cal > 0) {
+    // 2. Déclencheur Calories
+    if (trigger === 'cal') {
+      if (tSec > 0 && cal > 0) {
+        calHr = Math.round((cal / tSec) * 3600);
+        watts = wattsFromCalHr(calHr);
+        rpm = rpmFromWatts(watts);
+        rpmEl.value = rpm > 0 ? rpm : '';
+        calHrEl.value = calHr;
+        wattsEl.value = watts;
+      } else if (cal > 0 && calHr > 0) {
         tSec = (cal / calHr) * 3600;
         timeEl.value = formatDisplaySeconds(tSec);
       }
       return;
     }
 
-    // 3. Watts saisis directement
-    if (watts > 0 && trigger === 'watts') {
-      calHr = calHrFromWatts(watts);
-      rpm = rpmFromWatts(watts);
+    // 3. Déclencheur RPM
+    if (trigger === 'rpm') {
+      if (rpm > 0) {
+        watts = wattsFromRpm(rpm);
+        calHr = calHrFromWatts(watts);
+        wattsEl.value = watts;
+        calHrEl.value = calHr;
 
-      calHrEl.value = calHr;
-      rpmEl.value = rpm > 0 ? rpm : '';
-
-      if (tSec > 0) {
-        calEl.value = Math.round((calHr * tSec) / 3600);
-      } else if (cal > 0) {
-        tSec = (cal / calHr) * 3600;
-        timeEl.value = formatDisplaySeconds(tSec);
+        if (tSec > 0) {
+          calEl.value = Math.round((calHr * tSec) / 3600);
+        } else if (cal > 0) {
+          tSec = (cal / calHr) * 3600;
+          timeEl.value = formatDisplaySeconds(tSec);
+        }
       }
       return;
     }
 
-    // 4. Cal/hr saisi directement
-    if (calHr > 0 && trigger === 'calhr') {
-      watts = wattsFromCalHr(calHr);
-      rpm = rpmFromWatts(watts);
+    // 4. Déclencheur Watts
+    if (trigger === 'watts') {
+      if (watts > 0) {
+        calHr = calHrFromWatts(watts);
+        rpm = rpmFromWatts(watts);
+        calHrEl.value = calHr;
+        rpmEl.value = rpm > 0 ? rpm : '';
 
-      wattsEl.value = watts;
-      rpmEl.value = rpm > 0 ? rpm : '';
+        if (tSec > 0) {
+          calEl.value = Math.round((calHr * tSec) / 3600);
+        } else if (cal > 0) {
+          tSec = (cal / calHr) * 3600;
+          timeEl.value = formatDisplaySeconds(tSec);
+        }
+      }
+      return;
+    }
 
-      if (tSec > 0) {
-        calEl.value = Math.round((calHr * tSec) / 3600);
-      } else if (cal > 0) {
-        tSec = (cal / calHr) * 3600;
-        timeEl.value = formatDisplaySeconds(tSec);
+    // 5. Déclencheur Cal/hr
+    if (trigger === 'calhr') {
+      if (calHr > 0) {
+        watts = wattsFromCalHr(calHr);
+        rpm = rpmFromWatts(watts);
+        wattsEl.value = watts;
+        rpmEl.value = rpm > 0 ? rpm : '';
+
+        if (tSec > 0) {
+          calEl.value = Math.round((calHr * tSec) / 3600);
+        } else if (cal > 0) {
+          tSec = (cal / calHr) * 3600;
+          timeEl.value = formatDisplaySeconds(tSec);
+        }
       }
     }
   }
-
   // --- ERG CALC : RUNNING (CONVERSION AUTOMATIQUE KM / MI) ---
   const METERS_PER_MILE = 1609.344;
 
