@@ -1,4 +1,4 @@
-const CACHE_NAME = 'apx-cardioscale-v3';
+const CACHE_NAME = 'apx-cardioscale-v4';
 const ASSETS = [
   './',
   './index.html',
