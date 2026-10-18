@@ -325,6 +325,18 @@
       margin-top: -2px;
       margin-bottom: 4px;
     }
+    .level-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 10px;
+    }
+    .level-block:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
     .preset-pill {
       background: var(--card-inner);
       border: 1px solid var(--border);
@@ -355,10 +367,11 @@
     <button class="btn-clear" onclick="resetAll()">Clear</button>
   </div>
 
-  <div class="mode-switch">
+<div class="mode-switch">
     <button class="mode-btn active" id="btnModeDist" onclick="setMode('distance')">Distance</button>
     <button class="mode-btn" id="btnModeCal" onclick="setMode('calorie')">Calories</button>
     <button class="mode-btn" id="btnModeErg" onclick="setMode('erg')">Erg Calc</button>
+    <button class="mode-btn" id="btnModeWeight" onclick="setMode('weights')">Weights</button>
   </div>
 
   <div id="dynamicContainer"></div>
@@ -370,6 +383,7 @@
   let ergSubMode = 'c2'; // 'c2' | 'echo' | 'run'
   let runUnit = 'km';    // 'km' | 'mi'
   let currentRunMeters = 0;
+  let currentRxMlbs = 0;
 
   let runState = {
     distMeters: 5000,
@@ -419,11 +433,12 @@
     { label: "5:00 - 6:00", c2H: 100, c2F: 80, airH: 75, airF: 60, run: 1000, shut: 50 }
   ];
 
-  function setMode(mode) {
+function setMode(mode) {
     mainMode = mode;
     document.getElementById('btnModeDist').classList.toggle('active', mode === 'distance');
     document.getElementById('btnModeCal').classList.toggle('active', mode === 'calorie');
     document.getElementById('btnModeErg').classList.toggle('active', mode === 'erg');
+    document.getElementById('btnModeWeight').classList.toggle('active', mode === 'weights');
     renderLayout();
   }
 
@@ -508,7 +523,7 @@
             </div>
           </div>
         `;
-      } else {
+      } else if (mainMode === 'erg') {
         fieldsHtml = `
           <div class="section-card">
             <div class="section-title">Calories & Equivalence</div>
@@ -744,6 +759,67 @@
       if (isRun) {
         updateRunDisplay();
       }
+    }
+    } else if (mainMode === 'weights') {
+      container.innerHTML = `
+        <div class="section-card">
+          <div class="section-title">Barbell Load Scaling</div>
+          <div class="presets-row" id="presets_container"></div>
+
+          <!-- 1. BLOC RX -->
+          <div class="level-block">
+            <div class="item-label">RX (Men / Women)</div>
+            <div class="single-box">
+              <input type="number" class="box-input in-male" id="rx_m_lbs" placeholder="-" oninput="onWeightInput('rx_m_lbs', this.value)">
+              <span class="slash">/</span>
+              <input type="number" class="box-input in-female" id="rx_f_lbs" placeholder="-" oninput="onWeightInput('rx_f_lbs', this.value)">
+              <span class="unit-tag">lbs</span>
+            </div>
+            <div class="single-box">
+              <input type="number" class="box-input in-male" id="rx_m_kg" placeholder="-" oninput="onWeightInput('rx_m_kg', this.value)">
+              <span class="slash">/</span>
+              <input type="number" class="box-input in-female" id="rx_f_kg" placeholder="-" oninput="onWeightInput('rx_f_kg', this.value)">
+              <span class="unit-tag">kg</span>
+            </div>
+          </div>
+
+          <!-- 2. BLOC PERFORMANCE -->
+          <div class="level-block">
+            <div class="item-label">Performance (Men / Women)</div>
+            <div class="single-box">
+              <input type="number" class="box-input in-male" id="perf_m_lbs" placeholder="-" oninput="onWeightInput('perf_m_lbs', this.value)">
+              <span class="slash">/</span>
+              <input type="number" class="box-input in-female" id="perf_f_lbs" placeholder="-" oninput="onWeightInput('perf_f_lbs', this.value)">
+              <span class="unit-tag">lbs</span>
+            </div>
+            <div class="single-box">
+              <input type="number" class="box-input in-male" id="perf_m_kg" placeholder="-" oninput="onWeightInput('perf_m_kg', this.value)">
+              <span class="slash">/</span>
+              <input type="number" class="box-input in-female" id="perf_f_kg" placeholder="-" oninput="onWeightInput('perf_f_kg', this.value)">
+              <span class="unit-tag">kg</span>
+            </div>
+          </div>
+
+          <!-- 3. BLOC FITNESS -->
+          <div class="level-block">
+            <div class="item-label">Fitness (Men / Women)</div>
+            <div class="single-box">
+              <input type="number" class="box-input in-male" id="fit_m_lbs" placeholder="-" oninput="onWeightInput('fit_m_lbs', this.value)">
+              <span class="slash">/</span>
+              <input type="number" class="box-input in-female" id="fit_f_lbs" placeholder="-" oninput="onWeightInput('fit_f_lbs', this.value)">
+              <span class="unit-tag">lbs</span>
+            </div>
+            <div class="single-box">
+              <input type="number" class="box-input in-male" id="fit_m_kg" placeholder="-" oninput="onWeightInput('fit_m_kg', this.value)">
+              <span class="slash">/</span>
+              <input type="number" class="box-input in-female" id="fit_f_kg" placeholder="-" oninput="onWeightInput('fit_f_kg', this.value)">
+              <span class="unit-tag">kg</span>
+            </div>
+          </div>
+        </div>
+      `;
+      renderWeightPresets();
+      if (currentRxMlbs > 0) renderWeightOutputs();
     }
   }
 
@@ -1157,9 +1233,146 @@
       }
     }
   }
+// --- WEIGHTS TAB LOGIC ---
+  const PRESET_BARBELL_STANDARDS = [
+    { label: "45/35",   rxM: 45,  rxF: 35,  perfM: 45,  perfF: 35,  fitM: 35,  fitF: 25 },
+    { label: "75/55",   rxM: 75,  rxF: 55,  perfM: 65,  perfF: 45,  fitM: 55,  fitF: 35 },
+    { label: "95/65",   rxM: 95,  rxF: 65,  perfM: 75,  perfF: 55,  fitM: 65,  fitF: 45 },
+    { label: "115/80",  rxM: 115, rxF: 80,  perfM: 95,  perfF: 65,  fitM: 75,  fitF: 55 },
+    { label: "135/95",  rxM: 135, rxF: 95,  perfM: 115, perfF: 75,  fitM: 95,  fitF: 65 },
+    { label: "155/105", rxM: 155, rxF: 105, perfM: 125, perfF: 85,  fitM: 105, fitF: 75 },
+    { label: "185/125", rxM: 185, rxF: 125, perfM: 145, perfF: 95,  fitM: 125, fitF: 85 },
+    { label: "205/145", rxM: 205, rxF: 145, perfM: 165, perfF: 115, fitM: 135, fitF: 95 },
+    { label: "225/155", rxM: 225, rxF: 155, perfM: 185, perfF: 125, fitM: 155, fitF: 105 },
+    { label: "275/185", rxM: 275, rxF: 185, perfM: 225, perfF: 155, fitM: 185, fitF: 125 },
+    { label: "315/225", rxM: 315, rxF: 225, perfM: 255, perfF: 185, fitM: 205, fitF: 155 }
+  ];
 
-  function resetAll() {
+  const REAL_BARBELL_KG = {
+    45: 20, 35: 15, 25: 10, 55: 25, 65: 30, 75: 34, 80: 36, 85: 38,
+    95: 43, 105: 48, 115: 52, 125: 57, 135: 61, 145: 65, 155: 70,
+    165: 75, 175: 80, 185: 84, 205: 93, 225: 102, 255: 115, 275: 125, 315: 143
+  };
+
+  const REAL_BARBELL_LBS = {
+    20: 45, 15: 35, 10: 25, 25: 55, 30: 65, 34: 75, 36: 80, 38: 85,
+    43: 95, 48: 105, 52: 115, 57: 125, 61: 135, 65: 145, 70: 155,
+    75: 165, 80: 175, 84: 185, 93: 205, 102: 225, 115: 255, 125: 275, 143: 315
+  };
+
+  function barbellLbsToKg(lbs) {
+    if (!lbs || lbs <= 0) return 0;
+    if (REAL_BARBELL_KG[lbs]) return REAL_BARBELL_KG[lbs];
+    return Math.round(lbs * 0.45359237);
+  }
+
+  function barbellKgToLbs(kg) {
+    if (!kg || kg <= 0) return 0;
+    if (REAL_BARBELL_LBS[kg]) return REAL_BARBELL_LBS[kg];
+    return Math.round((kg / 0.45359237) / 5) * 5;
+  }
+
+  function roundToBarbellFive(val) {
+    if (!val || val <= 0) return 0;
+    return Math.max(0, Math.round(val / 5) * 5);
+  }
+
+  function renderWeightPresets() {
+    const container = document.getElementById('presets_container');
+    if (!container) return;
+    let html = '';
+    PRESET_BARBELL_STANDARDS.forEach(std => {
+      const active = (currentRxMlbs > 0 && Math.abs(currentRxMlbs - std.rxM) < 2) ? 'active' : '';
+      html += `<span class="preset-pill ${active}" onclick="selectWeightPreset(${std.rxM})">${std.label}</span>`;
+    });
+    container.innerHTML = html;
+  }
+
+  function selectWeightPreset(rxMlbs) {
+    currentRxMlbs = rxMlbs;
+    renderWeightPresets();
+    renderWeightOutputs();
+  }
+
+  function renderWeightOutputs(skipId = null) {
+    if (!currentRxMlbs || currentRxMlbs <= 0) return;
+
+    let rxM, rxF, perfM, perfF, fitM, fitF;
+    const exact = PRESET_BARBELL_STANDARDS.find(s => Math.abs(s.rxM - currentRxMlbs) < 1);
+
+    if (exact) {
+      rxM = exact.rxM; rxF = exact.rxF;
+      perfM = exact.perfM; perfF = exact.perfF;
+      fitM = exact.fitM; fitF = exact.fitF;
+    } else {
+      rxM = currentRxMlbs;
+      rxF = (currentRxMlbs === 45) ? 35 : roundToBarbellFive(currentRxMlbs * 0.70);
+      perfM = roundToBarbellFive(currentRxMlbs * 0.80);
+      perfF = (rxF === 35) ? 35 : roundToBarbellFive(rxF * 0.80);
+      fitM = roundToBarbellFive(currentRxMlbs * 0.65);
+      fitF = (rxF === 35) ? 25 : roundToBarbellFive(rxF * 0.65);
+    }
+
+    updateField('rx_m_lbs', rxM, skipId);
+    updateField('rx_f_lbs', rxF, skipId);
+    updateField('perf_m_lbs', perfM, skipId);
+    updateField('perf_f_lbs', perfF, skipId);
+    updateField('fit_m_lbs', fitM, skipId);
+    updateField('fit_f_lbs', fitF, skipId);
+
+    updateField('rx_m_kg', barbellLbsToKg(rxM), skipId);
+    updateField('rx_f_kg', barbellLbsToKg(rxF), skipId);
+    updateField('perf_m_kg', barbellLbsToKg(perfM), skipId);
+    updateField('perf_f_kg', barbellLbsToKg(perfF), skipId);
+    updateField('fit_m_kg', barbellLbsToKg(fitM), skipId);
+    updateField('fit_f_kg', barbellLbsToKg(fitF), skipId);
+  }
+
+  function onWeightInput(sourceId, rawVal) {
+    const val = parseFloat(rawVal) || 0;
+    if (val <= 0) {
+      currentRxMlbs = 0;
+      renderWeightPresets();
+      return;
+    }
+
+    let lbsVal = sourceId.endsWith('_kg') ? barbellKgToLbs(val) : val;
+
+    switch (sourceId) {
+      case 'rx_m_lbs':
+      case 'rx_m_kg':
+        currentRxMlbs = lbsVal;
+        break;
+      case 'rx_f_lbs':
+      case 'rx_f_kg':
+        currentRxMlbs = (lbsVal === 35) ? 45 : roundToBarbellFive(lbsVal / 0.70);
+        break;
+      case 'perf_m_lbs':
+      case 'perf_m_kg':
+        currentRxMlbs = roundToBarbellFive(lbsVal / 0.80);
+        break;
+      case 'perf_f_lbs':
+      case 'perf_f_kg':
+        currentRxMlbs = (lbsVal === 35) ? 45 : roundToBarbellFive((lbsVal / 0.80) / 0.70);
+        break;
+      case 'fit_m_lbs':
+      case 'fit_m_kg':
+        currentRxMlbs = roundToBarbellFive(lbsVal / 0.65);
+        break;
+      case 'fit_f_lbs':
+      case 'fit_f_kg':
+        currentRxMlbs = (lbsVal === 25) ? 45 : roundToBarbellFive((lbsVal / 0.65) / 0.70);
+        break;
+    }
+
+    renderWeightPresets();
+    renderWeightOutputs(sourceId);
+  }
+
+  
+function resetAll() {
     currentRunMeters = 0;
+    currentRxMlbs = 0;
     runState = { distMeters: 5000, timeSec: 0, speedKmh: 0 };
     renderLayout();
   }
