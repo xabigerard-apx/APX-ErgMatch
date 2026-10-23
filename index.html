@@ -936,6 +936,130 @@
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   }
 
+// --- ERG CALC : ECHO BIKE (CALIBRATION RÉELLE ROGUE) ---
+  function wattsFromRpm(rpm) {
+    if (rpm <= 0) return 0;
+    if (rpm < 30) return Math.round(rpm * 1.5);
+    return Math.round(0.000602337 * Math.pow(rpm, 3.11762) + 32.64);
+  }
+
+  function rpmFromWatts(watts) {
+    if (watts <= 35) return 0;
+    return Math.round(Math.pow((watts - 32.64) / 0.000602337, 1 / 3.11762));
+  }
+
+  function calHrFromWatts(watts) {
+    return Math.round(watts * 3);
+  }
+
+  function wattsFromCalHr(calHr) {
+    return Math.round(calHr / 3);
+  }
+
+  function calcEcho(trigger) {
+    const timeEl = document.getElementById('echo_time');
+    const calEl = document.getElementById('echo_cal');
+    const rpmEl = document.getElementById('echo_rpm');
+    const calHrEl = document.getElementById('echo_calhr');
+    const wattsEl = document.getElementById('echo_watts');
+
+    let tSec = parseFormattedSeconds(timeEl.value);
+    let cal = parseFloat(calEl.value) || 0;
+    let rpm = parseFloat(rpmEl.value) || 0;
+    let calHr = parseFloat(calHrEl.value) || 0;
+    let watts = parseFloat(wattsEl.value) || 0;
+
+    // 1. Déclencheur TEMPS
+    if (trigger === 'time') {
+      if (tSec >= 5 && cal > 0) {
+        // Temps + Cible Calories déjà là -> Calcule l'allure requise
+        calHr = Math.round((cal / tSec) * 3600);
+        watts = wattsFromCalHr(calHr);
+        rpm = rpmFromWatts(watts);
+
+        calHrEl.value = calHr;
+        wattsEl.value = watts;
+        rpmEl.value = rpm > 0 ? rpm : '';
+      } else if (tSec >= 5 && calHr > 0 && cal === 0) {
+        // Temps + Allure existante sans calories -> Calcule les calories
+        calEl.value = Math.round((calHr * tSec) / 3600);
+      }
+      return;
+    }
+
+    // 2. Déclencheur CALORIES
+    if (trigger === 'cal') {
+      if (cal > 0 && tSec >= 5) {
+        // Calories + Temps déjà là -> Calcule l'allure requise
+        calHr = Math.round((cal / tSec) * 3600);
+        watts = wattsFromCalHr(calHr);
+        rpm = rpmFromWatts(watts);
+
+        calHrEl.value = calHr;
+        wattsEl.value = watts;
+        rpmEl.value = rpm > 0 ? rpm : '';
+      } else if (cal > 0 && calHr > 0 && tSec === 0) {
+        // Calories + Allure sans temps -> Calcule le temps requis
+        tSec = (cal / calHr) * 3600;
+        timeEl.value = formatDisplaySeconds(tSec);
+      }
+      return;
+    }
+
+    // 3. Déclencheur RPM
+    if (trigger === 'rpm') {
+      if (rpm > 0) {
+        watts = wattsFromRpm(rpm);
+        calHr = calHrFromWatts(watts);
+        wattsEl.value = watts;
+        calHrEl.value = calHr;
+
+        if (cal > 0) {
+          tSec = (cal / calHr) * 3600;
+          timeEl.value = formatDisplaySeconds(tSec);
+        } else if (tSec > 0) {
+          calEl.value = Math.round((calHr * tSec) / 3600);
+        }
+      }
+      return;
+    }
+
+    // 4. Déclencheur WATTS
+    if (trigger === 'watts') {
+      if (watts > 0) {
+        calHr = calHrFromWatts(watts);
+        rpm = rpmFromWatts(watts);
+        calHrEl.value = calHr;
+        rpmEl.value = rpm > 0 ? rpm : '';
+
+        if (cal > 0) {
+          tSec = (cal / calHr) * 3600;
+          timeEl.value = formatDisplaySeconds(tSec);
+        } else if (tSec > 0) {
+          calEl.value = Math.round((calHr * tSec) / 3600);
+        }
+      }
+      return;
+    }
+
+    // 5. Déclencheur CAL/HR
+    if (trigger === 'calhr') {
+      if (calHr > 0) {
+        watts = wattsFromCalHr(calHr);
+        rpm = rpmFromWatts(watts);
+        wattsEl.value = watts;
+        rpmEl.value = rpm > 0 ? rpm : '';
+
+        if (cal > 0) {
+          tSec = (cal / calHr) * 3600;
+          timeEl.value = formatDisplaySeconds(tSec);
+        } else if (tSec > 0) {
+          calEl.value = Math.round((calHr * tSec) / 3600);
+        }
+      }
+    }
+  }
+
   // --- ERG CALC : CONCEPT2 ---
   function calcC2(trigger) {
     const timeEl = document.getElementById('c2_time');
@@ -952,20 +1076,59 @@
     let calHr = parseFloat(calHrEl.value) || 0;
     let watts = parseFloat(wattsEl.value) || 0;
 
-    // Déclencheur Temps
+    // 1. Déclencheur TEMPS
     if (trigger === 'time') {
-      if (tSec > 0 && paceSec > 0) {
-        distEl.value = Math.round((tSec / paceSec) * 500);
-        if (calHr > 0) calEl.value = Math.round((calHr * tSec) / 3600);
-      } else if (tSec > 0 && cal > 0) {
+      if (tSec >= 5 && cal > 0) {
+        // Temps + Calories -> Calcule allure C2 sans toucher aux calories
         calHr = Math.round((cal / tSec) * 3600);
         watts = Math.max(0, (calHr - 300) / (4 * 0.8604));
         const pSec = watts > 0 ? (Math.cbrt(2.8 / watts) * 500) : 0;
-        distEl.value = pSec > 0 ? Math.round((tSec / pSec) * 500) : '';
         paceEl.value = formatDisplaySeconds(pSec);
         calHrEl.value = calHr;
         wattsEl.value = Math.round(watts);
-      } else if (tSec > 0 && dist > 0) {
+        if (pSec > 0) distEl.value = Math.round((tSec / pSec) * 500);
+      } else if (tSec >= 5 && dist > 0) {
+        // Temps + Distance -> Calcule allure C2
+        paceSec = (tSec / dist) * 500;
+        watts = 2.8 / Math.pow(paceSec / 500, 3);
+        calHr = Math.round((watts * 4 * 0.8604) + 300);
+        calEl.value = Math.round((calHr * tSec) / 3600);
+        paceEl.value = formatDisplaySeconds(paceSec);
+        calHrEl.value = calHr;
+        wattsEl.value = Math.round(watts);
+      } else if (tSec >= 5 && paceSec > 0) {
+        distEl.value = Math.round((tSec / paceSec) * 500);
+        if (calHr > 0) calEl.value = Math.round((calHr * tSec) / 3600);
+      }
+      return;
+    }
+
+    // 2. Déclencheur CALORIES
+    if (trigger === 'cal') {
+      if (cal > 0 && tSec >= 5) {
+        // Calories + Temps -> Calcule allure C2
+        calHr = Math.round((cal / tSec) * 3600);
+        watts = Math.max(0, (calHr - 300) / (4 * 0.8604));
+        const pSec = watts > 0 ? (Math.cbrt(2.8 / watts) * 500) : 0;
+        paceEl.value = formatDisplaySeconds(pSec);
+        calHrEl.value = calHr;
+        wattsEl.value = Math.round(watts);
+        if (pSec > 0) distEl.value = Math.round((tSec / pSec) * 500);
+      } else if (cal > 0 && calHr > 0 && tSec === 0) {
+        tSec = (cal / calHr) * 3600;
+        timeEl.value = formatDisplaySeconds(tSec);
+        if (paceSec > 0) distEl.value = Math.round((tSec / paceSec) * 500);
+      }
+      return;
+    }
+
+    // 3. Déclencheur DISTANCE
+    if (trigger === 'dist') {
+      if (dist > 0 && paceSec > 0) {
+        tSec = (dist / 500) * paceSec;
+        timeEl.value = formatDisplaySeconds(tSec);
+        if (calHr > 0) calEl.value = Math.round((calHr * tSec) / 3600);
+      } else if (dist > 0 && tSec >= 5) {
         paceSec = (tSec / dist) * 500;
         watts = 2.8 / Math.pow(paceSec / 500, 3);
         calHr = Math.round((watts * 4 * 0.8604) + 300);
@@ -977,27 +1140,7 @@
       return;
     }
 
-    // Déclencheur Calories
-    if (trigger === 'cal') {
-      if (cal > 0 && calHr > 0) {
-        tSec = (cal / calHr) * 3600;
-        timeEl.value = formatDisplaySeconds(tSec);
-        if (paceSec > 0) distEl.value = Math.round((tSec / paceSec) * 500);
-      }
-      return;
-    }
-
-    // Déclencheur Distance
-    if (trigger === 'dist') {
-      if (dist > 0 && paceSec > 0) {
-        tSec = (dist / 500) * paceSec;
-        timeEl.value = formatDisplaySeconds(tSec);
-        if (calHr > 0) calEl.value = Math.round((calHr * tSec) / 3600);
-      }
-      return;
-    }
-
-    // Déclencheur Allure (Pace)
+    // 4. Déclencheur ALLURE (PACE)
     if (trigger === 'pace' && paceSec > 0) {
       watts = 2.8 / Math.pow(paceSec / 500, 3);
       calHr = Math.round((watts * 4 * 0.8604) + 300);
@@ -1019,7 +1162,7 @@
       return;
     }
 
-    // Déclencheur Cal/hr
+    // 5. Déclencheur CAL/HR
     if (trigger === 'calhr' && calHr > 0) {
       watts = Math.max(0, (calHr - 300) / (4 * 0.8604));
       wattsEl.value = Math.round(watts);
@@ -1037,7 +1180,7 @@
       return;
     }
 
-    // Déclencheur Watts
+    // 6. Déclencheur WATTS
     if (trigger === 'watts' && watts > 0) {
       calHr = Math.round((watts * 4 * 0.8604) + 300);
       calHrEl.value = calHr;
@@ -1054,126 +1197,7 @@
       }
     }
   }
-
-  // --- ERG CALC : ECHO BIKE (CALIBRATION RÉELLE ROGUE) ---
-  function wattsFromRpm(rpm) {
-    if (rpm <= 0) return 0;
-    if (rpm < 30) return Math.round(rpm * 1.5);
-    return Math.round(0.000602337 * Math.pow(rpm, 3.11762) + 32.64);
-  }
-
-  function rpmFromWatts(watts) {
-    if (watts <= 35) return 0;
-    return Math.round(Math.pow((watts - 32.64) / 0.000602337, 1 / 3.11762));
-  }
-
-  function calHrFromWatts(watts) {
-    return Math.round(watts * 3);
-  }
-
-  function wattsFromCalHr(calHr) {
-    return Math.round(calHr / 3);
-  }
-
-function calcEcho(trigger) {
-    const timeEl = document.getElementById('echo_time');
-    const calEl = document.getElementById('echo_cal');
-    const rpmEl = document.getElementById('echo_rpm');
-    const calHrEl = document.getElementById('echo_calhr');
-    const wattsEl = document.getElementById('echo_watts');
-
-    let tSec = parseFormattedSeconds(timeEl.value);
-    let cal = parseFloat(calEl.value) || 0;
-    let rpm = parseFloat(rpmEl.value) || 0;
-    let calHr = parseFloat(calHrEl.value) || 0;
-    let watts = parseFloat(wattsEl.value) || 0;
-
-    // Déclencheur Temps : Recalcule les calories si l'allure existe déjà
-    if (trigger === 'time') {
-      if (tSec > 0 && calHr > 0) {
-        calEl.value = Math.round((calHr * tSec) / 3600);
-      } else if (tSec > 0 && cal > 0) {
-        calHr = Math.round((cal / tSec) * 3600);
-        watts = wattsFromCalHr(calHr);
-        rpm = rpmFromWatts(watts);
-        rpmEl.value = rpm > 0 ? rpm : '';
-        calHrEl.value = calHr;
-        wattsEl.value = watts;
-      }
-      return;
-    }
-
-    // Déclencheur Calories : Recalcule le temps si l'allure existe déjà
-    if (trigger === 'cal') {
-      if (cal > 0 && calHr > 0) {
-        tSec = (cal / calHr) * 3600;
-        timeEl.value = formatDisplaySeconds(tSec);
-      } else if (cal > 0 && tSec > 0) {
-        calHr = Math.round((cal / tSec) * 3600);
-        watts = wattsFromCalHr(calHr);
-        rpm = rpmFromWatts(watts);
-        rpmEl.value = rpm > 0 ? rpm : '';
-        calHrEl.value = calHr;
-        wattsEl.value = watts;
-      }
-      return;
-    }
-
-    // Déclencheur RPM : Allure modifiée
-    if (trigger === 'rpm') {
-      if (rpm > 0) {
-        watts = wattsFromRpm(rpm);
-        calHr = calHrFromWatts(watts);
-        wattsEl.value = watts;
-        calHrEl.value = calHr;
-
-        // Priorité : si une cible de calories est posée, calculer le TEMPS
-        if (cal > 0) {
-          tSec = (cal / calHr) * 3600;
-          timeEl.value = formatDisplaySeconds(tSec);
-        } else if (tSec > 0) {
-          calEl.value = Math.round((calHr * tSec) / 3600);
-        }
-      }
-      return;
-    }
-
-    // Déclencheur Watts
-    if (trigger === 'watts') {
-      if (watts > 0) {
-        calHr = calHrFromWatts(watts);
-        rpm = rpmFromWatts(watts);
-        calHrEl.value = calHr;
-        rpmEl.value = rpm > 0 ? rpm : '';
-
-        if (cal > 0) {
-          tSec = (cal / calHr) * 3600;
-          timeEl.value = formatDisplaySeconds(tSec);
-        } else if (tSec > 0) {
-          calEl.value = Math.round((calHr * tSec) / 3600);
-        }
-      }
-      return;
-    }
-
-    // Déclencheur Cal/hr
-    if (trigger === 'calhr') {
-      if (calHr > 0) {
-        watts = wattsFromCalHr(calHr);
-        rpm = rpmFromWatts(watts);
-        wattsEl.value = watts;
-        rpmEl.value = rpm > 0 ? rpm : '';
-
-        if (cal > 0) {
-          tSec = (cal / calHr) * 3600;
-          timeEl.value = formatDisplaySeconds(tSec);
-        } else if (tSec > 0) {
-          calEl.value = Math.round((calHr * tSec) / 3600);
-        }
-      }
-    }
-  }
-
+  
   // --- ERG CALC : RUNNING (CONVERSION AUTOMATIQUE KM / MI) ---
   const METERS_PER_MILE = 1609.344;
 
