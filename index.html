@@ -952,80 +952,105 @@
     let calHr = parseFloat(calHrEl.value) || 0;
     let watts = parseFloat(wattsEl.value) || 0;
 
-    if (tSec > 0 && cal > 0 && (trigger === 'time' || trigger === 'cal')) {
-      calHr = Math.round((cal / tSec) * 3600);
-      watts = Math.max(0, (calHr - 300) / (4 * 0.8604));
-      const pSec = watts > 0 ? (Math.cbrt(2.8 / watts) * 500) : 0;
-      const d = pSec > 0 ? Math.round((tSec / pSec) * 500) : 0;
-
-      distEl.value = d || '';
-      paceEl.value = formatDisplaySeconds(pSec);
-      calHrEl.value = calHr;
-      wattsEl.value = Math.round(watts);
+    // Déclencheur Temps
+    if (trigger === 'time') {
+      if (tSec > 0 && paceSec > 0) {
+        distEl.value = Math.round((tSec / paceSec) * 500);
+        if (calHr > 0) calEl.value = Math.round((calHr * tSec) / 3600);
+      } else if (tSec > 0 && cal > 0) {
+        calHr = Math.round((cal / tSec) * 3600);
+        watts = Math.max(0, (calHr - 300) / (4 * 0.8604));
+        const pSec = watts > 0 ? (Math.cbrt(2.8 / watts) * 500) : 0;
+        distEl.value = pSec > 0 ? Math.round((tSec / pSec) * 500) : '';
+        paceEl.value = formatDisplaySeconds(pSec);
+        calHrEl.value = calHr;
+        wattsEl.value = Math.round(watts);
+      } else if (tSec > 0 && dist > 0) {
+        paceSec = (tSec / dist) * 500;
+        watts = 2.8 / Math.pow(paceSec / 500, 3);
+        calHr = Math.round((watts * 4 * 0.8604) + 300);
+        calEl.value = Math.round((calHr * tSec) / 3600);
+        paceEl.value = formatDisplaySeconds(paceSec);
+        calHrEl.value = calHr;
+        wattsEl.value = Math.round(watts);
+      }
       return;
     }
 
-    if (tSec > 0 && dist > 0 && (trigger === 'time' || trigger === 'dist')) {
-      const pSec = (tSec / dist) * 500;
-      watts = 2.8 / Math.pow(pSec / 500, 3);
-      calHr = Math.round((watts * 4 * 0.8604) + 300);
-      cal = Math.round((calHr * tSec) / 3600);
-
-      calEl.value = cal;
-      paceEl.value = formatDisplaySeconds(pSec);
-      calHrEl.value = calHr;
-      wattsEl.value = Math.round(watts);
+    // Déclencheur Calories
+    if (trigger === 'cal') {
+      if (cal > 0 && calHr > 0) {
+        tSec = (cal / calHr) * 3600;
+        timeEl.value = formatDisplaySeconds(tSec);
+        if (paceSec > 0) distEl.value = Math.round((tSec / paceSec) * 500);
+      }
       return;
     }
 
-    if (paceSec > 0 && trigger === 'pace') {
+    // Déclencheur Distance
+    if (trigger === 'dist') {
+      if (dist > 0 && paceSec > 0) {
+        tSec = (dist / 500) * paceSec;
+        timeEl.value = formatDisplaySeconds(tSec);
+        if (calHr > 0) calEl.value = Math.round((calHr * tSec) / 3600);
+      }
+      return;
+    }
+
+    // Déclencheur Allure (Pace)
+    if (trigger === 'pace' && paceSec > 0) {
       watts = 2.8 / Math.pow(paceSec / 500, 3);
       calHr = Math.round((watts * 4 * 0.8604) + 300);
       calHrEl.value = calHr;
       wattsEl.value = Math.round(watts);
 
-      if (dist > 0) {
-        tSec = (dist / 500) * paceSec;
-        timeEl.value = formatDisplaySeconds(tSec);
-        calEl.value = Math.round((calHr * tSec) / 3600);
-      } else if (cal > 0) {
+      if (cal > 0) {
         tSec = (cal / calHr) * 3600;
         timeEl.value = formatDisplaySeconds(tSec);
         distEl.value = Math.round((tSec / paceSec) * 500);
+      } else if (dist > 0) {
+        tSec = (dist / 500) * paceSec;
+        timeEl.value = formatDisplaySeconds(tSec);
+        calEl.value = Math.round((calHr * tSec) / 3600);
+      } else if (tSec > 0) {
+        distEl.value = Math.round((tSec / paceSec) * 500);
+        calEl.value = Math.round((calHr * tSec) / 3600);
       }
       return;
     }
 
-    if (calHr > 0 && trigger === 'calhr') {
+    // Déclencheur Cal/hr
+    if (trigger === 'calhr' && calHr > 0) {
       watts = Math.max(0, (calHr - 300) / (4 * 0.8604));
       wattsEl.value = Math.round(watts);
       const pSec = watts > 0 ? (Math.cbrt(2.8 / watts) * 500) : 0;
       paceEl.value = formatDisplaySeconds(pSec);
 
-      if (tSec > 0) {
-        calEl.value = Math.round((calHr * tSec) / 3600);
-        distEl.value = pSec > 0 ? Math.round((tSec / pSec) * 500) : '';
-      } else if (cal > 0) {
+      if (cal > 0) {
         tSec = (cal / calHr) * 3600;
         timeEl.value = formatDisplaySeconds(tSec);
-        distEl.value = pSec > 0 ? Math.round((tSec / pSec) * 500) : '';
+        if (pSec > 0) distEl.value = Math.round((tSec / pSec) * 500);
+      } else if (tSec > 0) {
+        calEl.value = Math.round((calHr * tSec) / 3600);
+        if (pSec > 0) distEl.value = Math.round((tSec / pSec) * 500);
       }
       return;
     }
 
-    if (watts > 0 && trigger === 'watts') {
+    // Déclencheur Watts
+    if (trigger === 'watts' && watts > 0) {
       calHr = Math.round((watts * 4 * 0.8604) + 300);
       calHrEl.value = calHr;
       const pSec = Math.cbrt(2.8 / watts) * 500;
       paceEl.value = formatDisplaySeconds(pSec);
 
-      if (tSec > 0) {
-        calEl.value = Math.round((calHr * tSec) / 3600);
-        distEl.value = Math.round((tSec / pSec) * 500);
-      } else if (cal > 0) {
+      if (cal > 0) {
         tSec = (cal / calHr) * 3600;
         timeEl.value = formatDisplaySeconds(tSec);
-        distEl.value = Math.round((tSec / pSec) * 500);
+        if (pSec > 0) distEl.value = Math.round((tSec / pSec) * 500);
+      } else if (tSec > 0) {
+        calEl.value = Math.round((calHr * tSec) / 3600);
+        if (pSec > 0) distEl.value = Math.round((tSec / pSec) * 500);
       }
     }
   }
@@ -1050,7 +1075,7 @@
     return Math.round(calHr / 3);
   }
 
-  function calcEcho(trigger) {
+function calcEcho(trigger) {
     const timeEl = document.getElementById('echo_time');
     const calEl = document.getElementById('echo_cal');
     const rpmEl = document.getElementById('echo_rpm');
@@ -1063,38 +1088,38 @@
     let calHr = parseFloat(calHrEl.value) || 0;
     let watts = parseFloat(wattsEl.value) || 0;
 
-    // 1. Déclencheur Temps
+    // Déclencheur Temps : Recalcule les calories si l'allure existe déjà
     if (trigger === 'time') {
-      if (tSec > 0 && cal > 0) {
+      if (tSec > 0 && calHr > 0) {
+        calEl.value = Math.round((calHr * tSec) / 3600);
+      } else if (tSec > 0 && cal > 0) {
         calHr = Math.round((cal / tSec) * 3600);
         watts = wattsFromCalHr(calHr);
         rpm = rpmFromWatts(watts);
         rpmEl.value = rpm > 0 ? rpm : '';
         calHrEl.value = calHr;
         wattsEl.value = watts;
-      } else if (tSec > 0 && calHr > 0) {
-        calEl.value = Math.round((calHr * tSec) / 3600);
       }
       return;
     }
 
-    // 2. Déclencheur Calories
+    // Déclencheur Calories : Recalcule le temps si l'allure existe déjà
     if (trigger === 'cal') {
-      if (tSec > 0 && cal > 0) {
-        calHr = Math.round((cal / tSec) * 3600);
-        watts = wattsFromCalHr(calHr);
-        rpm = rpmFromWatts(watts);
-        rpmEl.value = rpm > 0 ? rpm : '';
-        calHrEl.value = calHr;
-        wattsEl.value = watts;
-      } else if (cal > 0 && calHr > 0) {
+      if (cal > 0 && calHr > 0) {
         tSec = (cal / calHr) * 3600;
         timeEl.value = formatDisplaySeconds(tSec);
+      } else if (cal > 0 && tSec > 0) {
+        calHr = Math.round((cal / tSec) * 3600);
+        watts = wattsFromCalHr(calHr);
+        rpm = rpmFromWatts(watts);
+        rpmEl.value = rpm > 0 ? rpm : '';
+        calHrEl.value = calHr;
+        wattsEl.value = watts;
       }
       return;
     }
 
-    // 3. Déclencheur RPM
+    // Déclencheur RPM : Allure modifiée
     if (trigger === 'rpm') {
       if (rpm > 0) {
         watts = wattsFromRpm(rpm);
@@ -1102,17 +1127,18 @@
         wattsEl.value = watts;
         calHrEl.value = calHr;
 
-        if (tSec > 0) {
-          calEl.value = Math.round((calHr * tSec) / 3600);
-        } else if (cal > 0) {
+        // Priorité : si une cible de calories est posée, calculer le TEMPS
+        if (cal > 0) {
           tSec = (cal / calHr) * 3600;
           timeEl.value = formatDisplaySeconds(tSec);
+        } else if (tSec > 0) {
+          calEl.value = Math.round((calHr * tSec) / 3600);
         }
       }
       return;
     }
 
-    // 4. Déclencheur Watts
+    // Déclencheur Watts
     if (trigger === 'watts') {
       if (watts > 0) {
         calHr = calHrFromWatts(watts);
@@ -1120,17 +1146,17 @@
         calHrEl.value = calHr;
         rpmEl.value = rpm > 0 ? rpm : '';
 
-        if (tSec > 0) {
-          calEl.value = Math.round((calHr * tSec) / 3600);
-        } else if (cal > 0) {
+        if (cal > 0) {
           tSec = (cal / calHr) * 3600;
           timeEl.value = formatDisplaySeconds(tSec);
+        } else if (tSec > 0) {
+          calEl.value = Math.round((calHr * tSec) / 3600);
         }
       }
       return;
     }
 
-    // 5. Déclencheur Cal/hr
+    // Déclencheur Cal/hr
     if (trigger === 'calhr') {
       if (calHr > 0) {
         watts = wattsFromCalHr(calHr);
@@ -1138,11 +1164,11 @@
         wattsEl.value = watts;
         rpmEl.value = rpm > 0 ? rpm : '';
 
-        if (tSec > 0) {
-          calEl.value = Math.round((calHr * tSec) / 3600);
-        } else if (cal > 0) {
+        if (cal > 0) {
           tSec = (cal / calHr) * 3600;
           timeEl.value = formatDisplaySeconds(tSec);
+        } else if (tSec > 0) {
+          calEl.value = Math.round((calHr * tSec) / 3600);
         }
       }
     }
